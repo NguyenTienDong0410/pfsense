@@ -1,5 +1,71 @@
+# Triển khai và Quản trị Hệ thống Lọc mạng với pfBlockerNG
+
+**Phần 1: Tổng quan về pfBlockerNG và Kiến trúc hoạt động**
+
+* 1.1. pfBlockerNG là gì? Vai trò của pfBlockerNG trong hệ thống Firewall.
+* 1.2. Phân biệt hai thành phần lõi:
+* IP Filtering (Lọc theo dải IP và Vị trí địa lý - GeoIP).
+* DNSBL - DNS Blackhole (Lọc theo tên miền để chặn quảng cáo, malware).
 
 
+* 1.3. Tại sao nên sử dụng phiên bản `pfBlockerNG-devel` thay vì bản tiêu chuẩn?
+
+**Phần 2: Chuẩn bị và Cài đặt**
+
+* 2.1. Yêu cầu về tài nguyên phần cứng (CPU, RAM) khi chạy cơ sở dữ liệu lớn.
+* 2.2. Gỡ cài đặt bản cũ an toàn (Lưu ý mục Keep Settings).
+* 2.3. Quy trình cài đặt package `pfBlockerNG-devel` từ giao diện pfSense.
+* 2.4. Khởi chạy pfBlockerNG Setup Wizard (Cấu hình tự động ban đầu).
+
+**Phần 3: Cấu hình tính năng Lọc IP (IP Filtering) và GeoIP**
+
+* 3.1. Đăng ký và thiết lập MaxMind License Key:
+* Tạo tài khoản MaxMind miễn phí.
+* Tích hợp License Key vào tab IP để kích hoạt dữ liệu GeoIP.
+
+
+* 3.2. Cấu hình GeoIP (Lọc theo khu vực địa lý):
+* Phân tích các Action: Deny Inbound, Deny Outbound, Permit/Whitelist.
+* Lựa chọn chặn theo toàn châu lục hoặc từng quốc gia cụ thể.
+
+
+* 3.3. Xây dựng IPv4/IPv6 Source Definitions (Danh sách chặn/thả tự động):
+* Tích hợp các Feeds bên ngoài (Spamhaus, dshield,...).
+* Cấu hình Custom List cho các IP nội bộ hoặc IP lẻ.
+
+
+
+**Phần 4: Cấu hình tính năng lọc tên miền (DNSBL)**
+
+* 4.1. Cơ chế hoạt động của DNSBL (Chuyển hướng truy cập xấu về Virtual IP - Sinkhole).
+* 4.2. Cấu hình DNSBL Category và Feeds:
+* Thêm danh sách chặn quảng cáo (Adaway, Easylist).
+* Thêm danh sách chặn tên miền độc hại (Malware, Phishing).
+
+
+* 4.3. Thiết lập DNSBL Whitelist (Loại trừ các tên miền hợp lệ bị nhận diện nhầm).
+* 4.4. Kích hoạt tính năng SafeSearch (Bảo vệ tìm kiếm an toàn trên Google, YouTube, Bing).
+
+**Phần 5: Xử lý pfBlockerNG trong môi trường có Proxy/CDN (Nâng cao)**
+
+* 5.1. Bản chất sự cố khi kết hợp pfSense với Reverse Proxy (Cloudflare, HAProxy).
+* 5.2. Kịch bản giải quyết 1: Đẩy tác vụ chặn GeoIP lên tầng WAF (Cloudflare).
+* 5.3. Kịch bản giải quyết 2: Khóa chặt máy chủ gốc (Origin Server):
+* Sử dụng IPv4 Source Definitions tải danh sách IP động của Cloudflare.
+* Tạo luật Permit riêng cho cụm IP này và Drop mọi truy cập trực tiếp khác.
+
+
+
+**Phần 6: Vận hành, Theo dõi Logs và Xử lý sự cố (Troubleshooting)**
+
+* 6.1. Nguyên tắc áp dụng luật: Tính năng Force Reload / Update (Update -> Cron / Force).
+* 6.2. Theo dõi và phân tích Logs trên tab Alerts:
+* Xem chi tiết IP/Domain bị chặn, cổng giao tiếp và quốc gia nguồn.
+* Tùy chỉnh bật/tắt Logging để tối ưu tài nguyên hệ thống pfSense.
+
+
+* 6.3. Xử lý hiện tượng False Positives (Chặn nhầm IP hợp lệ của dịch vụ).
+* 6.4. Backup và Restore cấu hình pfBlockerNG an toàn.
 ## 1. Phương pháp chặn truy cập truyền thống (Firewall Rule/Alias) và các hạn chế
 
 Trong giai đoạn đầu triển khai quản lý truy cập mạng, phương pháp cơ bản nhất được áp dụng là sử dụng Firewall Rule mặc định của pfSense kết hợp với tính năng Alias.
