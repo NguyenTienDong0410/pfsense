@@ -30,9 +30,6 @@ Khi người dùng truy cập một trang web bị cấm (ví dụ: `facebook.co
 pfBlockerNG tự động đồng bộ và tải về các danh sách IP/Tên miền đen (Feeds) từ các tổ chức an ninh mạng uy tín trên thế giới (như danh sách chặn Malware, Ads, Social Network,...). Quản trị viên chỉ cần chọn hạng mục cần chặn, hệ thống sẽ tự động cập nhật hàng ngày mà không cần thêm bớt thủ công bất kỳ Rule nào.
 
 ---
-Dưới đây là phần viết tiếp cho báo cáo, trình bày các bước triển khai và cấu hình pfBlockerNG. Phần này được thiết kế bám sát theo luồng logic của phần trước, tập trung vào tính năng DNSBL để giải quyết triệt để bài toán chặn tên miền.
-
----
 
 ## 3. Hướng dẫn triển khai và cấu hình pfBlockerNG (DNSBL)
 
@@ -147,3 +144,20 @@ Lý do là hệ thống đã điều hướng tên miền về một IP ảo. Tr
 
 ---
 
+# 4. IP
+
+Chặn theo vùng bằng GeoIP
+<img width="1513" height="636" alt="image" src="https://github.com/user-attachments/assets/dca020c6-08c9-4305-8a70-30a8a4e0d8f4" />
+
+Chặn theo IPV4
+<img width="1501" height="639" alt="image" src="https://github.com/user-attachments/assets/032a3b81-db49-4ee4-a127-45f553ee1632" />
+
+<img width="1518" height="736" alt="image" src="https://github.com/user-attachments/assets/812457d3-5639-41fe-ac3a-2bc611db8be5" />
+
+<img width="1477" height="736" alt="image" src="https://github.com/user-attachments/assets/9363d4ca-c660-4655-b4bf-3baab898a253" />
+
+có thể import IPv4 Source Definitions chặn theo list
+
+Ngoài ra còn ohaanf IPv4 Custom_List để tự thêm từng IP riêng lẻ
+
+phần cấu hình ở đây cũng như phần DNSBL đều được ghi vào Rules trong phần Firewall
