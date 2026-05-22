@@ -1,7 +1,6 @@
 Triển khai High Availability (HA) - CARP trên pfSense
 ---
 
-### Mục lục: Triển khai High Availability (HA) - CARP trên pfSense
 
 **Phần 1: Tổng quan về kiến trúc High Availability trên pfSense**
 
@@ -80,32 +79,51 @@ CARP VIP IP: 192.168.197.186
 
 
 **Phần 3: Cấu hình cơ sở trên cả hai Node (Primary & Secondary)**
+
 Ở phần cấu hình đã set up dải mạng và cấu hình cơ bản cho node Primary, xem tại báo cáo : 
-(<a href "https://github.com/NguyenTienDong0410/pfsense/blob/main/pfsense_caidat_cauhinh.md">  Cài đặt cấu hình pfsense </a>)
+<a href="https://github.com/NguyenTienDong0410/pfsense/blob/main/pfsense_caidat_cauhinh.md">Cài đặt và cấu hình pfsense</a>
+tiếp đến cũng setup cấu hình của secondary tương tự với dải mạng như trên 
 
 * 3.1. Thiết lập địa chỉ IP tĩnh cho các cổng giao tiếp (WAN, LAN).
-* 
+  
 * 3.2. Cấu hình Firewall Rules trên cổng SYNC (Cho phép toàn bộ traffic IPv4 qua giao thức pfsync).
-* 
+  
 * 3.3. Kiểm tra kết nối cơ bản giữa 2 Node (Ping chéo qua dải IP SYNC).
 
 **Phần 4: Thiết lập High Availability (Thực hiện trên Node Primary)**
 
 * 4.1. Tạo CARP Virtual IPs (VIPs):
+  
 * Cấu hình VIP cho giao diện WAN.
+  
+<img width="1559" height="780" alt="image" src="https://github.com/user-attachments/assets/a4c927c9-b633-4f3d-bea1-949401b90cc2" />
+
 * Cấu hình VIP cho giao diện LAN.
+  
+<img width="1458" height="731" alt="image" src="https://github.com/user-attachments/assets/2022442e-b8ac-44c6-80d9-9ffd3c7a6db9" />
+
 * Thiết lập Base vhid và Passwords cho CARP.
 
+<img width="1498" height="487" alt="image" src="https://github.com/user-attachments/assets/fb413c0f-38f9-4071-a46e-ca7ad486ec09" />
+
+vào máy Backup(secondary) , có thể thấy các ip được đồng bộ và tự động chỉnh skew độ ưu tiên thành 100, khác với máy master là skew = 0
+
+<img width="1532" height="736" alt="image" src="https://github.com/user-attachments/assets/65838311-0d38-4dba-9c49-9d4374461e03" />
 
 * 4.2. Cấu hình Outbound NAT để sử dụng CARP VIP:
 * Chuyển sang chế độ Manual Outbound NAT hoặc Hybrid.
+
+<img width="1520" height="674" alt="image" src="https://github.com/user-attachments/assets/2e1a7815-dd57-4c2d-a136-44a0d8fe6945" />
+
 * Chỉnh sửa các luật NAT tự động để gán Translation IP thành VIP WAN.
+<img width="1488" height="424" alt="image" src="https://github.com/user-attachments/assets/d9fb6664-c238-4ff9-b686-b74deb0ff490" />
 
 
 * 4.3. Cấu hình DHCP Server cho mạng nội bộ:
 * Gán Default Gateway và DNS Server trỏ về địa chỉ VIP LAN.
 * Cấu hình Failover Peer IP để đồng bộ trạng thái thuê DHCP (DHCP Leases) sang Node 2.
 
+<img width="1334" height="665" alt="image" src="https://github.com/user-attachments/assets/cf0ad4c5-89c1-4359-a471-6d10ff21323f" />
 
 
 **Phần 5: Kích hoạt đồng bộ hóa (Synchronization)**
@@ -113,28 +131,55 @@ CARP VIP IP: 192.168.197.186
 * 5.1. Thiết lập pfsync (Đồng bộ trạng thái - State Sync):
 * Kích hoạt pfsync trên cổng giao tiếp SYNC.
 * Khai báo IP tĩnh của Peer Node.
+  
+<img width="1483" height="707" alt="image" src="https://github.com/user-attachments/assets/80516a9d-bde5-4364-9ee5-9b0673066324" />
 
 
 * 5.2. Thiết lập XMLRPC Sync (Đồng bộ cấu hình - Config Sync):
 * Nhập IP cổng SYNC của Node Secondary.
 * Nhập Admin Username và Password của Node Secondary.
 * Lựa chọn các thành phần cấu hình cần đồng bộ (Firewall rules, NAT, Virtual IPs, Aliases,...).
+<img width="1514" height="651" alt="image" src="https://github.com/user-attachments/assets/8b91bc88-6a0f-445b-af9d-17211a8b339c" />
+
+<img width="1500" height="797" alt="image" src="https://github.com/user-attachments/assets/f1a273d2-4684-4862-b442-91baa501ad65" />
 
 
 * 5.3. Kiểm tra quá trình đẩy cấu hình từ Primary sang Secondary (Trigger Sync).
+Test tạo user, ngay lập tức được đẩy qua Secondary
+<img width="1500" height="797" alt="image" src="https://github.com/user-attachments/assets/0407cf64-307d-4324-aa94-d201de323c85" />
 
 **Phần 6: Kiểm thử và Đánh giá hệ thống (Failover Testing)**
 
 * 6.1. Kiểm tra trạng thái CARP trên cả 2 Node (Status > CARP) để xác nhận vai trò MASTER / BACKUP.
-* 6.2. Kịch bản test 1: Primary Node mất điện hoặc treo phần cứng.
-* 6.3. Kịch bản test 2: Đứt cáp mạng WAN hoặc LAN trên Node Primary.
-* 6.4. Đánh giá thời gian chuyển đổi (Downtime) và tính liên tục của kết nối (Ping test liên tục).
-* 6.5. Kịch bản khôi phục (Failback): Đưa Primary Node hoạt động trở lại và thu hồi quyền MASTER.
+  <img width="1130" height="753" alt="image" src="https://github.com/user-attachments/assets/7af41380-c96b-434e-854c-77b0e3661853" />
+
+  <img width="1545" height="734" alt="image" src="https://github.com/user-attachments/assets/57ab28c1-1846-4a61-923a-55bd7d784161" />
+
+
+* 6.2. Kịch bản test 1: Primary Node mất điện hoặc treo phần cứng (tắt con pfsense master).
+
+  
+* 6.4. Đánh giá thời gian chuyển đổi (Downtime) và tính liên tục của kết nối (Ping test liên tục) ping tới google.com liên tục.
+
+  <img width="669" height="711" alt="image" src="https://github.com/user-attachments/assets/b6ba3fc4-c3ea-45b5-ab22-c5dee36e10fc" />
+  ngay sau khi tắt tín hiệu đã đứt đoạn nhưng chỉ khoảng 1 giây , con  pfsensebackup đã lên thay làm máy master 
+
+<img width="1565" height="789" alt="image" src="https://github.com/user-attachments/assets/2bd12196-9a0b-4bfd-8ed8-7106b58f49fd" />
+
+* 6.5. Kịch bản khôi phục (Failback): Đưa Primary Node hoạt động trở lại và thu hồi quyền MASTER ngay sau khi được bật trở lại.
+
+<img width="1553" height="725" alt="image" src="https://github.com/user-attachments/assets/8739f4c2-76d5-4a8e-81af-2d336f2a5e0b" />
+
 
 **Phần 7: Vận hành bảo trì và Xử lý sự cố thường gặp (Troubleshooting)**
 
 * 7.1. Chế độ bảo trì an toàn (Enter Persistent CARP Maintenance Mode) để cập nhật phần mềm.
+  
 * 7.2. Xử lý lỗi "Split-Brain" (Cả hai Node đều hiểu mình là MASTER).
+  
+* Lỗi này xảy ra khi Node Backup không nhận được nhịp tim từ Node Primary qua cổng WAN. Vì không nghe thấy gì, nó tưởng Node Primary đã "chết" nên tự động nâng quyền của nó lên làm MASTER. Hậu quả là cả 2 con đều tranh nhau một địa chỉ IP ảo.
+* <img width="1546" height="735" alt="image" src="https://github.com/user-attachments/assets/4e137105-7fd8-4e0f-9f3e-11e7ab4cf1e3" />
+
 * 7.3. Cách xử lý lỗi đồng bộ XMLRPC thất bại (Sai mật khẩu, kẹt port, v.v.).
 * 7.4. Lưu ý đặc biệt đối với môi trường ảo hóa (Promiscuous mode, MAC Address changes trên VMware/Proxmox).
 
@@ -143,79 +188,4 @@ CARP VIP IP: 192.168.197.186
 
 
 
-2 con pfsense
-<img width="1920" height="1029" alt="image" src="https://github.com/user-attachments/assets/e121dab6-44c0-4dde-9643-c06792cf6b17" />
 
-cấu hình HA trên máy active
-<img width="1920" height="1029" alt="image" src="https://github.com/user-attachments/assets/56624622-c789-4f3a-b570-f4c49709cc06" />
-
-<img width="1920" height="1029" alt="image" src="https://github.com/user-attachments/assets/733c766d-5d29-4996-887e-ae21f3fb0e22" />
-
-<img width="1920" height="1029" alt="image" src="https://github.com/user-attachments/assets/bcc6d69d-93c9-470a-a431-bb4f2044bd31" />
-
-cả 2 máy đã đồng bộ, 
-đặt viture ip trên con fw master
-ip ảo mạng wan
-<img width="1920" height="1029" alt="image" src="https://github.com/user-attachments/assets/dd6513c2-6b6a-46d5-ba17-e9e3f01464f4" />
-
-ip ảo mạng lan
-<img width="1920" height="1029" alt="image" src="https://github.com/user-attachments/assets/87565ce5-a6e2-456b-a10b-815d6b1cbab3" />
-
-đã đồng bộ 
-<img width="1920" height="1029" alt="image" src="https://github.com/user-attachments/assets/3eff32e4-39cc-43a7-b378-7d023d4583e2" />
-
-<img width="1920" height="1029" alt="image" src="https://github.com/user-attachments/assets/356ecadc-e4aa-4ea6-86f9-a3a3c0788673" />
-
-có thể thấy mức độ ưu tiên là khác nhau
- ở máy backup tự động độ ưu tiên tăng lên skew 100 so với skew 0 của máy master
- 
- <img width="1920" height="1029" alt="image" src="https://github.com/user-attachments/assets/276c11e2-ad5f-42df-bb3e-10bf974501d1" />
-
-thêm wget, có thể thấy đã nhận diện fw1 là master và fw2 là backup
- <img width="1920" height="1029" alt="image" src="https://github.com/user-attachments/assets/6205abb7-c79d-41f3-9d90-f7fc77c0592a" />
-
-ở đây, khi đặt gateway cần đặt ip ảo vì khi fw1 chết, gateway nằm ở bên fw1 các gói tin vẫn sẽ đi qua fw1 và không thể ra ngoài internet, vì vậy, cần gateway là ip ảo như trên và để các client trỏ hết về
- ip ảo này, để khi fw1 down, các gói tin có thể định tuyến về là fw2 để đi ra ngoài internet
- <img width="1920" height="1029" alt="image" src="https://github.com/user-attachments/assets/c17f3437-6e24-4039-a60e-4d94bf153097" />
-
-
-còn về failover peer ip , khi 
-Việc đặt Failover peer IP trên con Master trỏ về IP của con Backup (và ngược lại trên con Backup trỏ về Master) sử dụng giao thức DHCP Failover nhằm 3 mục đích cốt lõi sau trong hệ thống tính sẵn sàng cao (HA):
-
-1. Đồng bộ "Sổ hộ khẩu" cấp phát IP (Lease Database Synchronization)
-Khi một máy client (ví dụ: Windows Server hoặc PC) gửi yêu cầu xin IP, con Master sẽ cấp cho máy đó một địa chỉ, chẳng hạn là 10.10.20.15.
-
-Ngay lập tức, con Master sẽ gửi một thông điệp qua địa chỉ Failover peer IP để báo cho con Backup biết: "Tôi vừa cấp IP 10.10.20.15 cho máy có địa chỉ MAC này rồi nhé, ông ghi vào sổ đi".
-
-Con Backup sẽ cập nhật vào cơ sở dữ liệu của nó. Nhờ vậy, hai con luôn có một "cuốn sổ cái" giống hệt nhau về tình trạng các IP đang bận hay đang rảnh trong mạng.
-
-2. Tránh tuyệt đối xung đột IP (IP Conflict Prevention)
-Nếu không có dòng Failover peer IP để hai con thiết lập kênh nói chuyện riêng, hệ thống sẽ rơi vào trạng thái "mù thông tin":
-
-Con Master tự cấp dải .10 đến .50.
-
-Con Backup không biết Master đang làm gì, cũng tự ý cấp dải .10 đến .50.
-
-Hậu quả là Master có thể cấp IP .15 cho máy A, trong khi Backup lại cấp đúng IP .15 đó cho máy B. Mạng LAN sẽ bị xung đột IP và tê liệt ngay lập tức.
-
-Khi cấu hình Peer IP, hai con sẽ tự động chia nhau quyền quản lý dải IP (thường theo tỷ lệ 50/50 hoặc con Backup sẽ nhường toàn bộ cho Master và chỉ đứng nhìn) để không bao giờ cấp trùng IP.
-
-3. Làm kênh đo nhịp tim (Heartbeat / Keepalive)
-Địa chỉ Peer IP này đóng vai trò như một sợi dây liên lạc sinh tử giữa hai dịch vụ DHCP:
-
-Con Backup sẽ liên tục gửi các gói tin kiểm tra (Keepalive) tới Peer IP của con Master để xem Master còn sống không.
-
-Nếu con Master đột ngột bị sập (mất điện, lỗi phần cứng), con Backup sẽ thấy Peer IP của Master không còn phản hồi nữa. Nó sẽ lập tức kích hoạt trạng thái "Partner Down" (Đối tác đã sập) và một mình đứng ra thâu tóm toàn bộ dải IP để cấp phát tiếp cho các máy con mà không sợ đụng hàng với ai.
-
-Tóm lại một câu ngắn gọn: Cấu hình Failover peer IP là để hai dịch vụ DHCP trên hai con tường lửa "bắt tay" nhau, tạo thành một thể thống nhất, giúp chia sẻ thông tin và thay thế nhau một cách an toàn mà không gây loạn mạng.
-
-test
-thử tắt con active, hiện requestime out và lập tức ping tới google.com ổn định trở lại 
-<img width="1920" height="1029" alt="image" src="https://github.com/user-attachments/assets/c9fda941-090e-4e97-85f3-2eb7e8bf6f1f" />
-
-<img width="1920" height="1029" alt="image" src="https://github.com/user-attachments/assets/a2c61353-8e04-457c-b075-f102baef7a92" />
-con pfsense đã chết , và được chuyển quyền master sang cho con backup
-
-nhưng khi con pfsense active 1 sống lại thì sao ?
-<img width="1920" height="1029" alt="image" src="https://github.com/user-attachments/assets/338c05cf-54b5-49e7-8545-fbbc9505b5f6" />
-nó sẽ được nhận lại quyền và con pfsense backup đã trở lại thành backup
