@@ -2,6 +2,8 @@
 
 ## 1. Phân Tích Mô Hình & Quy Hoạch Địa Chỉ IP
 
+<img width="590" height="438" alt="image" src="https://github.com/user-attachments/assets/fcd8a376-3bc7-4bcc-972c-38ad660df453" />
+
 Trước khi cấu hình trên VMware, cần thống nhất thông số mạng dựa trên sơ đồ thiết kế:
 
 **Main Site (Trung Tâm - Cấu hình HA):**
