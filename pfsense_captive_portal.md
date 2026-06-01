@@ -54,6 +54,7 @@ Thực hiện trên con **pfSense Master**:
 2. Nhấn **Add** để tạo một Zone mới.
 * **Zone Name:** `LAN_Guest` (hoặc tên tùy ý)
 * **Zone Description:** Captive Portal cho mạng LAN vlan2
+<img width="1474" height="684" alt="image" src="https://github.com/user-attachments/assets/693d0157-b92a-47b7-9eac-7f5007d672e1" />
 
 
 3. Nhấn **Save & Continue**.
@@ -65,8 +66,21 @@ Thực hiện trên con **pfSense Master**:
 * **Authentication Method:** Chọn **Local Database** (để dùng user đã tạo ở Giai đoạn 1).
 * **Concurrent user logins:** Tích chọn nếu không muốn một user đăng nhập trên nhiều thiết bị cùng lúc.
 
+<img width="1334" height="670" alt="image" src="https://github.com/user-attachments/assets/2248c904-2db5-480d-8f34-2a3e98fe09d4" />
 
 5. Kéo xuống dưới cùng và nhấn **Save**.
+
+Có thể tạo 1 web login hoặc landing page riêng cho tùy nhu cầu sử dụng
+
+<img width="1344" height="548" alt="image" src="https://github.com/user-attachments/assets/312fd9cb-a3e1-4ae8-94f2-c790aa043ac9" />
+
+7. Ngoài ra còn cấu hình theo IP, host, mac của thiết bị để cho phép truy cập
+
+<img width="1422" height="650" alt="image" src="https://github.com/user-attachments/assets/deb698c6-646d-46ec-b679-4b82c23c9529" />
+
+<img width="1423" height="664" alt="image" src="https://github.com/user-attachments/assets/ba76cac1-865e-421d-8325-783a9db2b09c" />
+
+<img width="1488" height="584" alt="image" src="https://github.com/user-attachments/assets/6dfad22e-2832-42fb-80f0-539174737be9" />
 
 ### Giai đoạn 3: Cấu hình High Availability (HA) cho Captive Portal
 
@@ -104,6 +118,10 @@ Captive Portal hoạt động dựa vào việc chặn truy cập web (HTTP) và
 4. Trình duyệt sẽ tự động Redirect về trang đăng nhập của pfSense (Captive Portal page).
 5. Nhập tài khoản `guest01` đã tạo ở Bước 1.
 6. Sau khi đăng nhập thành công, bạn sẽ truy cập được Internet bình thường ra đường WAN.
+<img width="1583" height="761" alt="image" src="https://github.com/user-attachments/assets/5f99bd7e-fa2e-4d61-8d1d-acd0fb9c3ccd" />
+
+
+<img width="1604" height="749" alt="image" src="https://github.com/user-attachments/assets/2e82d00d-94ac-43a6-8e6f-53af051ab0c7" />
 
 ---
 
